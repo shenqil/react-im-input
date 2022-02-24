@@ -1,0 +1,81 @@
+{
+  "name": "@shen9401/react-dialog",
+  "version": "0.0.8",
+  "description": "创建一个弹窗的示例",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "webpack --config webpack.dev.js",
+    "start": "webpack serve --config webpack.dev.js",
+    "build": "cross-env NODE_ENV=production webpack --config webpack.prod.js",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "push": "npm version patch && npm publish --access public",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "dialog"
+  ],
+  "author": "shen9401",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shenqil/webpack5-reactExp/tree/library"
+  },
+  "bugs": {
+    "url": "https://github.com/shenqil/webpack5-reactExp/issues"
+  },
+  "homepage": "https://github.com/shenqil/webpack5-reactExp/blob/library/README.md",
+  "devDependencies": {
+    "@babel/cli": "^7.13.10",
+    "@babel/core": "^7.13.10",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/preset-env": "^7.13.10",
+    "@babel/preset-react": "^7.12.13",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.2",
+    "@typescript-eslint/eslint-plugin": "^4.29.3",
+    "@typescript-eslint/parser": "^4.29.3",
+    "babel-loader": "^8.2.2",
+    "clean-webpack-plugin": "^3.0.0",
+    "core-js": "^3.9.1",
+    "cross-env": "^7.0.3",
+    "css-loader": "^5.1.1",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-airbnb-typescript": "^14.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^1.7.0",
+    "html-loader": "^2.1.1",
+    "html-webpack-plugin": "^5.2.0",
+    "mini-css-extract-plugin": "^1.3.9",
+    "postcss-loader": "^6.2.1",
+    "postcss-preset-env": "^7.4.1",
+    "sass": "^1.32.8",
+    "sass-loader": "^11.0.1",
+    "style-loader": "^2.0.0",
+    "ts-loader": "^8.0.17",
+    "typescript": "^4.2.2",
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.7.3"
+  },
+  "dependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "browserslist": {
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  }
+}
