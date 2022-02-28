@@ -1,37 +1,27 @@
-import React, { Component } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useRef } from 'react';
+import BaseInput from './components/BaseInput';
 import './index.scss';
 
-export interface IDialogProps{
-  hideDialog:Function
+export interface IIMProps{
+  handleSend:Function
 }
-export default class Dialog extends Component<IDialogProps> {
-  node:HTMLElement;
+export default function IMInput(props:IIMProps) {
+  const { handleSend } = props;
+  const editPanelRef = useRef<HTMLDivElement>(null); // 定义编辑框的引用
+  return (
+    <div className="react-im-input">
+      <BaseInput ref={editPanelRef} />
 
-  constructor(props:IDialogProps) {
-    super(props);
-
-    this.node = document.createElement('div');
-    this.node.classList.add('dialog');
-  }
-
-  componentDidMount() {
-    document.body.appendChild(this.node);
-  }
-
-  componentWillUnmount() {
-    document.body.removeChild(this.node);
-  }
-
-  render() {
-    const { hideDialog, children } = this.props;
-    return createPortal(
-      <div className="dialog-model">
-        {children}
-        {typeof hideDialog === 'function' && (
-        <button onClick={() => hideDialog()} type="button">关闭窗口</button>
-        )}
-      </div>, this.node,
-    );
-  }
+      {/* 底部发送 */}
+      <div className="react-im-input__btn">
+        <div
+          className="react-im-input__btn--inner"
+          onClick={() => handleSend()}
+          aria-hidden="true"
+        >
+          发送
+        </div>
+      </div>
+    </div>
+  );
 }
