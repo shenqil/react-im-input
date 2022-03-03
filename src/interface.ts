@@ -41,4 +41,12 @@ export interface IEmojiItem {
   data:string
 }
 
+/**
+ * 成员
+ * */
+export interface IMemberItem{
+  id:string,
+  name:string
+}
+
 export default {};

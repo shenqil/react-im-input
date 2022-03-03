@@ -1,26 +1,33 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, {
-  forwardRef, useRef, useImperativeHandle, KeyboardEvent, RefObject,
+  useRef, useImperativeHandle, KeyboardEvent, RefObject,
 } from 'react';
-import { IEmojiItem } from './interface';
+import { IEmojiItem, IMemberItem } from './interface';
 import { getMsgListByNode } from './utils';
+import { MemberContextProvider } from './context';
 import './index.scss';
 
-export interface IIMProps{
-  handleSend:Function
-}
+/**
+ * 暴露给外面调用的方法
+ * */
 export interface IIMRef{
   sendMsg:Function,
   insertEmoji:Function
 }
-const IMInput = forwardRef((props:IIMProps, ref:React.ForwardedRef<IIMRef>) => {
-  const { handleSend } = props;
+
+export interface IIMInputProps{
+  handleSend:Function,
+  onRef:React.Ref<IIMRef>
+}
+
+function IMInput(props:IIMInputProps) {
+  const { handleSend, onRef } = props;
 
   const editPanelRef = useRef<HTMLDivElement>(null);
   const { focus, backupFocus } = useCursor(editPanelRef);
 
   // 暴露出来的方法
-  useImperativeHandle(ref, () => ({
+  useImperativeHandle(onRef, () => ({
     sendMsg,
     insertEmoji,
   }));
@@ -87,7 +94,7 @@ const IMInput = forwardRef((props:IIMProps, ref:React.ForwardedRef<IIMRef>) => {
 
     </div>
   );
-});
+}
 
 /**
  * 光标Hook处理函数
@@ -122,4 +129,16 @@ function useCursor(editPanelRef:RefObject<HTMLDivElement>) {
   };
 }
 
-export default IMInput;
+export interface IIMProps extends IIMInputProps{
+  memberList:IMemberItem[]
+}
+const createIMInput = (Com:any) => (props:IIMProps) => {
+  const { memberList } = props;
+  return (
+    <MemberContextProvider value={memberList}>
+      {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+      <Com {...props} />
+    </MemberContextProvider>
+  );
+};
+export default createIMInput(IMInput);
