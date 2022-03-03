@@ -46,7 +46,8 @@ export interface IEmojiItem {
  * */
 export interface IMemberItem{
   id:string,
-  name:string
+  name:string,
+  avatar:string
 }
 
 export default {};

@@ -5,6 +5,7 @@ import React, {
 import { IEmojiItem, IMemberItem } from './interface';
 import { getMsgListByNode } from './utils';
 import { MemberContextProvider } from './context';
+import PopupMenu from './components/PopupMenu';
 import './index.scss';
 
 /**
@@ -92,6 +93,8 @@ function IMInput(props:IIMInputProps) {
         />
       </div>
 
+      {/* @弹出框 */}
+      <PopupMenu filterName="" onClickGroupMember={() => {}} />
     </div>
   );
 }

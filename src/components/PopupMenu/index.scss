@@ -1,0 +1,57 @@
+.react-im-input-popup-menu{
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow-x: hidden;
+  overflow-y: overlay;
+  width: 166px;
+  max-height: 300px;
+  display: block;
+  border-radius: 5px;
+  box-shadow: 0px 12px 48px 16px rgba(0, 0, 0, 0.03), 0px 9px 28px 0px rgba(0, 0, 0, 0.05), 0px 6px 16px -8px rgba(0, 0, 0, 0.08);
+
+  &__inner{
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    margin: 0;
+    background-color: #ffffff;
+    border-radius: 5px;
+  }
+
+  &__item {
+    width: 100%;
+    display: flex;
+    flex-flow: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 9px 5px 9px 10px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 1px solid #ededee;
+
+    &--active{
+      background-color: #ededee;
+    }
+  }
+
+  &__avatar {
+    width: 22px;
+    height: 22px;
+    margin-right: 7px;
+    border-radius: 50%;
+    overflow: hidden;
+    > img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__name {
+    display: flex;
+    min-width: 0;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
