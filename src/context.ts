@@ -1,4 +1,4 @@
-import React from 'React';
+import React from 'react';
 import { IMemberItem } from './interface';
 
 const MemberContext = React.createContext<IMemberItem[]>([]);
