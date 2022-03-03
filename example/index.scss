@@ -5,12 +5,34 @@
   flex-flow: column;
   justify-content: center;
   align-items: center;
-
   &_input{
     width: 550px;
     height: 146px;
     border-radius: 5px;
     border: 1px solid #666;
     padding: 5px;
+  }
+
+  &_btn{
+    margin: 10px;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: flex-start;
+
+    &--inner{
+      margin-right: 16px;
+      cursor: pointer;
+      width: 98px;
+      height: 32px;
+      line-height: 32px;
+      color: #fff;
+      font-size: 14px;
+      text-align: center;
+      background-color: #07c160;
+      border-radius: 2px;
+    }
   }
 }

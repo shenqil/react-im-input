@@ -1,38 +1,48 @@
-import React, { useRef } from 'react';
-import BaseInput from './components/BaseInput';
-import { getMsgListForNode } from './utils';
+import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import { getMsgListByNode } from './utils';
 import './index.scss';
 
 export interface IIMProps{
   handleSend:Function
 }
-export default function IMInput(props:IIMProps) {
+export interface IIMRef{
+  sendMsg:Function
+}
+const IMInput = forwardRef((props:IIMProps, ref:React.ForwardedRef<IIMRef>) => {
   const { handleSend } = props;
-  const editPanelRef = useRef<HTMLDivElement>(null); // 定义编辑框的引用
 
+  const editPanelRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * 发送消息
+   * */
   function sendMsg() {
     if (editPanelRef.current) {
-      const msgList = getMsgListForNode(editPanelRef.current);
-      editPanelRef.current.innerHTML = '';
+      const msgList = getMsgListByNode(editPanelRef.current);
       handleSend(msgList);
+      editPanelRef.current.innerHTML = '';
     }
   }
 
+  // 暴露出来的方法
+  useImperativeHandle(ref, () => ({
+    sendMsg,
+  }));
+
   return (
     <div className="react-im-input">
-      {/* 输入框区域 */}
-      <BaseInput ref={editPanelRef} />
 
-      {/* 底部发送 */}
-      <div className="react-im-input__btn">
+      {/* 输入框内容区 */}
+      <div className="react-im-input__container">
         <div
-          className="react-im-input__btn--inner"
-          onClick={() => sendMsg()}
-          aria-hidden="true"
-        >
-          发送
-        </div>
+          ref={editPanelRef}
+          contentEditable="true"
+          className="react-im-input__container-inner"
+        />
       </div>
+
     </div>
   );
-}
+});
+
+export default IMInput;

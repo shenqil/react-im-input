@@ -12,7 +12,7 @@ function mergeText(text:string, result:Array<EMsgItem>) {
   }
 }
 
-export function getMsgListForNode(el:Node | null, result:EMsgItem[] = []) {
+export function getMsgListByNode(el:Node | null, result:EMsgItem[] = []) {
   if (!el) {
     return result;
   }
@@ -70,12 +70,12 @@ export function getMsgListForNode(el:Node | null, result:EMsgItem[] = []) {
       }
 
       // 递归
-      getMsgListForNode(child, result);
+      getMsgListByNode(child, result);
     }
   });
   return result;
 }
 
 export default {
-  getMsgListForNode,
+  getMsgListByNode,
 };
