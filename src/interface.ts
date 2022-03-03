@@ -33,4 +33,12 @@ export interface EMsgItem {
   data:string | IFilePayload
 }
 
+/**
+ * 表情
+ * */
+export interface IEmojiItem {
+  key:string,
+  data:string
+}
+
 export default {};

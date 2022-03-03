@@ -2,17 +2,28 @@ import React,{useState,useRef} from 'react'
 import ReactDOM from 'react-dom';
 import './index.scss'
 import IMInput,{IIMRef} from '../src/index'
-import {EMsgItem} from '../src/interface'
+import {EMsgItem,IEmojiItem} from '../src/interface'
+import Emoji from './emoji'
 
 function App(){
   const [out,setOut] = useState<EMsgItem[]>([])
   const imInputRef = useRef<IIMRef>(null)
+
   function sendMsg(list:EMsgItem[]){
-    console.log(list,'sendMsg')
     setOut(list)
   }
+
+  function handleEmojiClick(item:IEmojiItem){
+    imInputRef.current?.insertEmoji(item)
+  }
+
   return (
     <div className='example'>
+
+      <div className='example_tools'>
+        <Emoji handleEmojiClick={handleEmojiClick}/>
+      </div>
+
       <div className='example_input'>
         <IMInput handleSend={sendMsg}  ref={imInputRef}/>
       </div>
