@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, {
-  useRef, useImperativeHandle, KeyboardEvent, RefObject,
+  useRef,
+  useState,
+  useImperativeHandle,
+  KeyboardEvent,
+  RefObject,
+  FormEvent,
+  CompositionEvent,
 } from 'react';
 import { IEmojiItem, IMemberItem } from './interface';
 import { getMsgListByNode } from './utils';
 import { MemberContextProvider } from './context';
-import PopupMenu from './components/PopupMenu';
+import PopupMenu, { IPopupMenuRef } from './components/PopupMenu';
 import './index.scss';
 
 /**
@@ -18,14 +24,25 @@ export interface IIMRef{
 
 export interface IIMInputProps{
   handleSend:Function,
-  onRef:React.Ref<IIMRef>
+  onRef:React.Ref<IIMRef>,
+  memberList:IMemberItem[]
 }
 
 function IMInput(props:IIMInputProps) {
-  const { handleSend, onRef } = props;
+  const { handleSend, onRef, memberList } = props;
 
   const editPanelRef = useRef<HTMLDivElement>(null);
+  const popupMenuRef = useRef<IPopupMenuRef>(null);
+  const isComposition = useRef(false);
+
   const { focus, backupFocus } = useCursor(editPanelRef);
+  const {
+    coordinate,
+    filterValue,
+    updateFilterValue,
+    showPopupMenu,
+    hidePopupMenu,
+  } = usePopupMenu(editPanelRef, popupMenuRef);
 
   // 暴露出来的方法
   useImperativeHandle(onRef, () => ({
@@ -56,11 +73,54 @@ function IMInput(props:IIMInputProps) {
     backupFocus();
   }
 
+  /**
+   * 插入群成员
+   * */
+  function insertMember(name:string) {
+    focus();
+
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i <= filterValue.length; i++) {
+      document.execCommand('Delete');
+    }
+
+    const div = `@${name}`;
+    // const div = `<span class="react-im-input--red" contenteditable="false">@${name}</span> `;
+    document.execCommand('insertHTML', false, div);
+
+    backupFocus();
+  }
+
+  /**
+   * 用户点击成员
+   * */
+  function onClickGroupMember(item:IMemberItem) {
+    insertMember(item.name);
+  }
+
   function onKeyDown(e:KeyboardEvent<HTMLDivElement>) {
     // 按下确认键
     if (e.code === 'Enter') {
       // 没有按下shift,或者当前显示群成员弹窗，都阻止输入
       if (!e.shiftKey) {
+        e.preventDefault();
+      }
+    }
+
+    // 按下 esc
+    if (e.code === 'Escape') {
+      hidePopupMenu();
+    }
+
+    // 拦截上下键
+    if (popupMenuRef.current?.isShow()) {
+      if (e.code === 'ArrowUp') {
+        popupMenuRef.current.activeIndexAdd();
+        e.preventDefault();
+      }
+
+      if (e.code === 'ArrowDown') {
+        popupMenuRef.current.activeIndexMinus();
         e.preventDefault();
       }
     }
@@ -70,8 +130,52 @@ function IMInput(props:IIMInputProps) {
     backupFocus();
 
     // 抬起确认键
-    if (e.code === 'Enter' && !e.shiftKey) {
-      sendMsg();
+    if (e.code === 'Enter') {
+      if (popupMenuRef.current?.isShow()) {
+        popupMenuRef.current.enterMember();
+      } else if (!e.shiftKey) {
+        sendMsg();
+      }
+    }
+  }
+
+  function onCompositionStart() {
+    isComposition.current = true;
+  }
+
+  function onCompositionEnd(e:CompositionEvent<HTMLDivElement>) {
+    const { data, inputType } = e as unknown as InputEvent;
+    isComposition.current = false;
+    // 中文完毕更新过滤值
+    updateFilterValue(data, inputType);
+  }
+
+  function onInput(e:FormEvent<HTMLDivElement>) {
+    const { data, inputType } = e.nativeEvent as InputEvent;
+
+    // 存在成员列表
+    if (memberList.length) {
+      if (data === '@') {
+        // 创建一个img用来描述光所在位置
+        const aiteID = `aite${Date.now()}`;
+        const div = `<img id="${aiteID}" style="display: inline-block; width: 0px; height: 0px;">`;
+        document.execCommand('insertHTML', false, div);
+        // 拿到用于定位的imgdom
+        const aiteDom = document.querySelector(`#${aiteID}`);
+        coordinate.current.offsetLeft = (aiteDom as HTMLElement).offsetLeft;
+        coordinate.current.offsetTop = (aiteDom as HTMLElement).offsetTop;
+        coordinate.current.isDelete = false;
+
+        // 定位完成后删除
+        document.execCommand('Delete');
+
+        backupFocus();
+
+        showPopupMenu();
+      } else if (!isComposition.current) {
+        // 非中文输入，实时更新过滤值
+        updateFilterValue(data, inputType);
+      }
     }
   }
 
@@ -87,6 +191,10 @@ function IMInput(props:IIMInputProps) {
           onKeyUp={onKeyUp}
           onKeyDown={onKeyDown}
           onClick={() => backupFocus()}
+          onBlur={() => backupFocus()}
+          onCompositionStart={onCompositionStart}
+          onCompositionEnd={onCompositionEnd}
+          onInput={onInput}
           role="textbox"
           aria-hidden
           className="react-im-input__container-inner"
@@ -94,7 +202,11 @@ function IMInput(props:IIMInputProps) {
       </div>
 
       {/* @弹出框 */}
-      <PopupMenu filterName="" onClickGroupMember={() => {}} />
+      <PopupMenu
+        onRef={popupMenuRef}
+        filterValue={filterValue}
+        onClickGroupMember={(item:IMemberItem) => onClickGroupMember(item)}
+      />
     </div>
   );
 }
@@ -132,8 +244,85 @@ function useCursor(editPanelRef:RefObject<HTMLDivElement>) {
   };
 }
 
+/**
+ * 弹窗Hook处理函数
+ * */
+function usePopupMenu(
+  editPanelRef:RefObject<HTMLDivElement>,
+  popupMenuRef:RefObject<IPopupMenuRef>,
+) {
+  // 记录过滤值
+  const filterValueRef = useRef('');
+  const [filterValue, setFilterValue] = useState('');
+  // 记录坐标状态
+  const coordinate = useRef({
+    offsetLeft: 0,
+    offsetTop: 0,
+    isDelete: false,
+  });
+  /**
+   * 更新过滤值
+   * */
+  function updateFilterValue(data:string | null, inputType:string) {
+    if (!popupMenuRef.current?.isShow()) {
+      return;
+    }
+    if (data) {
+      filterValueRef.current += data;
+      setFilterValue(filterValueRef.current);
+    } else if (inputType === 'deleteContentBackward') {
+      // 删除键
+      if (filterValueRef.current.length > 0) {
+        filterValueRef.current = filterValueRef.current.slice(0, -1);
+        setFilterValue(filterValueRef.current);
+      }
+
+      if (!filterValueRef.current) {
+        // 过滤值被清空，关闭群@弹窗
+        hidePopupMenu();
+      }
+    }
+  }
+
+  /**
+   * 显示弹窗
+   * */
+  function showPopupMenu() {
+    let left = coordinate.current.offsetLeft;
+
+    if (!editPanelRef.current || !popupMenuRef.current) {
+      return;
+    }
+
+    const top = coordinate.current.offsetTop - editPanelRef.current.scrollTop;
+
+    if (left + 166 > editPanelRef.current.clientWidth) {
+      left -= 166;
+    }
+
+    // 清空过滤值
+    filterValueRef.current = '';
+    setFilterValue('');
+
+    popupMenuRef.current?.show(left, top);
+  }
+
+  /**
+   * 隐藏窗口
+   * */
+  function hidePopupMenu() {
+    popupMenuRef.current?.hide();
+  }
+
+  return {
+    coordinate,
+    filterValue,
+    updateFilterValue,
+    showPopupMenu,
+    hidePopupMenu,
+  };
+}
 export interface IIMProps extends IIMInputProps{
-  memberList:IMemberItem[]
 }
 const createIMInput = (Com:any) => (props:IIMProps) => {
   const { memberList } = props;
