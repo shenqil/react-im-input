@@ -1,317 +1,94 @@
-# 1.拉取一份 react创建的工程 [地址](https://github.com/shenqil/webpack5-reactExp/tree/main)
+# 目前支持的功能
+
+- [x] Emoji 表情插入到输入框中显示
+- [x] @成员弹出，以及在输入框高亮提示
+- [ ] 支持图片插入，拖拽到输入框中显示
+- [ ] 支持文件插入，拖拽到输入框中显示
+[git地址](https://github.com/shenqil/react-im-input)
+
 ***
 
-# 2. 开发 思路
-+ 分两个文件夹
-+ dev 开启一个react开发项目
-+ src 为具体库的实现代码
-+ 然webpack配置一个正常的react项目，入口设置为dev下面的index
-+ 这样启动这个webpack，就可以在线开发src下面的库了
-
-# 2.1  以实现一个react弹窗组件为例，先写一个弹窗组件
-```
-// src\index.tsx
-
-import React, { Component } from 'react';
-import { createPortal } from 'react-dom';
-import './index.scss';
-
-export interface IDialogProps{
-  hideDialog:Function
-}
-export default class Dialog extends Component<IDialogProps> {
-  node:HTMLElement;
-
-  constructor(props:IDialogProps) {
-    super(props);
-
-    this.node = document.createElement('div');
-    this.node.classList.add('dialog');
-  }
-
-  componentDidMount() {
-    document.body.appendChild(this.node);
-  }
-
-  componentWillUnmount() {
-    document.body.removeChild(this.node);
-  }
-
-  render() {
-    const { hideDialog, children } = this.props;
-    return createPortal(
-      <div className="dialog-model">
-        {children}
-        {typeof hideDialog === 'function' && (
-        <button onClick={() => hideDialog()} type="button">关闭窗口</button>
-        )}
-      </div>, this.node,
-    );
-  }
-}
+# 安装
 
 ```
-
-# 2.2 在example开启react开发项目，并且使用src导出的Dialog 
+npm i @shen9401/react-im-input pinyin-match 
 ```
-// example\index.tsx
 
-import React, {  useState } from 'react'
-import ReactDOM from 'react-dom';
++ **@成员**支持模糊搜索，依赖`pinyin-match`
 
-import Diallog from '../src/index'
+***
+
+# 显示效果
+
+![image.png](https://upload-images.jianshu.io/upload_images/25820166-54b45281248e9765.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+***
+
+# 使用
+
+```
+import ImInput from '@shen9401/react-im-input'
 
 function App(){
-  const [isShowDialog,setIsShowDialog] = useState(false)
+  const [out,setOut] = useState<EMsgItem[]>([])
+  const imInputRef = useRef<IIMRef>(null)
+  const memberList = useMemberList()
+
+  function sendMsg(list:EMsgItem[]){
+    setOut(list)
+  }
+
+  function handleEmojiClick(item:IEmojiItem){
+    imInputRef.current?.insertEmoji(item)
+  }
+
   return (
-    <div>
-      <h3>DialogPage</h3>
-      <button onClick={() => setIsShowDialog(true)}>
-          toggle
-      </button>
-      {isShowDialog && <Diallog children="hello" hideDialog={() => setIsShowDialog(false)} />}
+    <div className='example'>
+
+      <div className='example_tools'>
+        <Emoji handleEmojiClick={handleEmojiClick}/>
+      </div>
+
+      <div className='example_input'>
+        <IMInput 
+          memberList={memberList as IMemberItem[]} 
+          handleSend={sendMsg}  
+          onRef={imInputRef}
+        />
+      </div>
+
+      <div className="example_btn">
+          <div
+            className="example_btn--inner"
+            aria-hidden="true"
+            onClick={()=>imInputRef.current?.sendMsg()}
+          >
+            发送
+          </div>
+      </div>
+
+      <ul className='example_out'>
+        {out.map((item,index)=>
+        (<li key={index}>
+          {JSON.stringify(item)}
+          </li>)
+        )}
+      </ul>
     </div>
     )
 }
 
-
-ReactDOM.render(<App />,document.getElementById('root'));
 ```
 
-# 2.3 配置 example 的webpack
-```
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-
-module.exports = {
-    entry: './dev/index.tsx',
-    output: {
-      filename: '[name].bundle.js',
-      path: path.resolve(__dirname, 'build'),
-    },
-    mode: 'development',
-    devtool: 'inline-source-map',
-    devServer: {
-        contentBase: './build',
-        // 启动gzip 压缩0
-        compress: true,
-        // 端口号
-        port: 8080,
-        open: true,
-        hot: true,
-    },
-    plugins: [
-      new HtmlWebpackPlugin({ template: './index.html' }),
-    ],
-    module: {
-        rules: [
-            {
-              test: /\.html$/i,
-              // 处理html文件的img图片(负责引入img,从而能被url-loader进行处理)
-              loader: 'html-loader',
-            },
-            {
-              test: /\.(ts|js)x?$/,
-              exclude: /node_modules/,
-              loader: 'babel-loader',
-            },
-            {
-              test: /\.(png|svg|jpg|jpeg|gif)$/i,
-              type: 'asset/resource',
-              generator: {
-                filename: 'static/images/[hash][ext][query]',
-              },
-            },
-            {
-              test: /\.(woff|woff2|eot|ttf|otf)$/i,
-              type: 'asset/resource',
-              generator: {
-                filename: 'static/font/[hash][ext][query]',
-              },
-            },
-            {
-                test: /\.((c|sa|sc)ss)$/i,
-                use: [
-                    "style-loader",
-                    "css-loader",
-                    'sass-loader'
-                ]
-            }
-        ]
-    },
-    optimization: {
-      splitChunks: {
-        chunks: 'all',
-      },
-    },
-    resolve: {
-      // 配置省略文件路径的后缀名
-      extensions: ['.tsx', '.ts', '.js'],
-    },
-}
-```
-# 2.4 最后 `npm run start` 就可以愉快的开发自己的库了
 ***
 
-# 3.打包思路
-+ 开启一个`webpack`,配置为`library`
-+ 排除用到的 `react`
-+ 去掉corejs
-# 3.1 配置一个生产环境的webpack
-```
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const path = require('path');
+## Emoji 功能
 
-module.exports = {
-    entry: './src/index.tsx',
-    mode: 'production',
-    devtool: 'source-map',
-    output: {
-      filename: 'index.js',
-      path: path.resolve(__dirname, 'dist'),
-      library:'react-dialog',
-      libraryTarget: 'umd'
-    },
-    plugins: [
-        new CleanWebpackPlugin(),
-        new MiniCssExtractPlugin({
-            filename: 'style.css',
-            chunkFilename: '[id].css',
-        }),
-    ],
-    module: {
-        rules: [
-            {
-              test: /\.(ts|js)x?$/,
-              exclude: /node_modules/,
-              loader: 'babel-loader',
-            },
-            {
-              test: /\.(png|svg|jpg|jpeg|gif)$/i,
-              type: 'asset/resource',
-              generator: {
-                filename: 'static/images/[hash][ext][query]',
-              },
-            },
-            {
-              test: /\.(woff|woff2|eot|ttf|otf)$/i,
-              type: 'asset/resource',
-              generator: {
-                filename: 'static/font/[hash][ext][query]',
-              },
-            },
-            {
-                test: /\.((c|sa|sc)ss)$/i,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                    },
-                    // 将css文件变成commonjs模块加载js中，里面内容是样式字符串
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            importLoaders: 2,
-                        }
-                    },
-                    'postcss-loader',
-                    'sass-loader'
-                ],
-            },
-        ]
-    },
-    resolve: {
-      // 配置省略文件路径的后缀名
-      extensions: ['.tsx', '.ts', '.js'],
-    },
-    externals:{
-      react:'react',
-      'react-dom':'react-dom'
-    }
-}
++ 直接调用内部方法 `imInputRef.current?.insertEmoji(item)`;item 满足 `{ key:string, data:base64 }`结构
 
-```
-+  `library:'react-dialog'`是库名称,`libraryTarget: 'umd'`编译库的目标,umd 代表`ES2015`,`CommonJS `可以使用
-+ `externals`,用户会导入的库，这里不用引入，减少打包体积
+## @成员功能
 
-# 3.2 去掉corejs,这里不引入减少打包体积，放给用户去引入
-```
-// .babelrc
++ props 传入 `memberList` 满足 `[{  id:string,name:string, avatar:string}]`结构
 
-{
-    "presets": [
-        "@babel/env",
-        "@babel/preset-react",
-        "@babel/preset-typescript"
-    ],
-    "plugins": [
-        "@babel/plugin-proposal-class-properties"
-    ]
-}
-```
+## 发送消息
 
-# 3.3  运行`npm run build`，会打包我们的组件库
-***
-
-# 4. 推送到npm
-## 4.1 修改`package.json`
-```
-  "name": "@shen9401/react-dialog",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "style": "dist/style.css",
-  "files": [
-    "dist"
-  ],
-```
-+ `main` node和浏览器所需要的文件 ; `module` 是node和浏览器ES模块需要的文件
-+   `"sideEffects": false` ,会忽略css
-
-## 4.2 登录到自己的npm账户
-```
-npm adduser --registry=https://registry.npmjs.org/
-```
-+ 会提示输入用户名，密码，邮箱，以及注册邮箱的验证码
-## 4.3 使用 ` nrm use npm` 切换到npm 源
-## 4.4 `npm publish --access public` 发布公共包
-***
-
-# 5.新建一个react项目
-## 5.1 执行 `npm i @shen9401/react-dialog` 按照包
-## 5.2 引入并使用
-```
-import Diallog from '@shen9401/react-dialog'
-import '@shen9401/react-dialog/dist/style.css'
-function App() {
-  const [isShowDialog,setIsShowDialog] = useState(false)
-  return (
-    <div className="App">
-      <button onClick={() => setIsShowDialog(true)}>
-          toggle
-      </button>
-      {isShowDialog && <Diallog children="hello" hideDialog={() => setIsShowDialog(false)} />}
-    </div>
-  );
-}
-```
-*** 
-# 6. 合并js和css, 修改webpack 配置，避免引入组件之后还要引入样式
-```
-            {
-                test: /\.((c|sa|sc)ss)$/i,
-                use: [
-                  "style-loader",
-                    // 将css文件变成commonjs模块加载js中，里面内容是样式字符串
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            importLoaders: 2,
-                        }
-                    },
-                    'postcss-loader',
-                    'sass-loader'
-                ],
-            },
-```
-+ 去掉 `MiniCssExtractPlugin`,改用`style-loader`
-***
++ props 传入`sendMsg`,按Enter键，或者调用`imInputRef.current?.insertEmoji(item)`,会触发`sendMsg`回调
