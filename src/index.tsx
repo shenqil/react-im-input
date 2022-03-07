@@ -268,15 +268,15 @@ function usePopupMenu(
       filterValueRef.current += data;
       setFilterValue(filterValueRef.current);
     } else if (inputType === 'deleteContentBackward') {
+      if (!filterValueRef.current) {
+        // 过滤值被清空，关闭群@弹窗
+        hidePopupMenu();
+      }
+
       // 删除键
       if (filterValueRef.current.length > 0) {
         filterValueRef.current = filterValueRef.current.slice(0, -1);
         setFilterValue(filterValueRef.current);
-      }
-
-      if (!filterValueRef.current) {
-        // 过滤值被清空，关闭群@弹窗
-        hidePopupMenu();
       }
     }
   }
