@@ -29,7 +29,7 @@ export interface IIMInputProps{
 }
 
 function IMInput(props:IIMInputProps) {
-  const { handleSend, onRef, memberList } = props;
+  const { handleSend = () => {}, onRef, memberList = [] } = props;
 
   const editPanelRef = useRef<HTMLDivElement>(null);
   const popupMenuRef = useRef<IPopupMenuRef>(null);
