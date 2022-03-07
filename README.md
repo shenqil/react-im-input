@@ -14,7 +14,7 @@
 npm i @shen9401/react-im-input pinyin-match 
 ```
 
-+ **@成员**支持模糊搜索，依赖`pinyin-match`
+- **@成员**支持模糊搜索，依赖`pinyin-match`
 
 ***
 
@@ -83,12 +83,12 @@ function App(){
 
 ## Emoji 功能
 
-+ 直接调用内部方法 `imInputRef.current?.insertEmoji(item)`;item 满足 `{ key:string, data:base64 }`结构
+- 直接调用内部方法 `imInputRef.current?.insertEmoji(item)`;item 满足 `{ key:string, data:base64 }`结构
 
 ## @成员功能
 
-+ props 传入 `memberList` 满足 `[{  id:string,name:string, avatar:string}]`结构
+- props 传入 `memberList` 满足 `[{  id:string,name:string, avatar:string}]`结构
 
 ## 发送消息
 
-+ props 传入`sendMsg`,按Enter键，或者调用`imInputRef.current?.insertEmoji(item)`,会触发`sendMsg`回调
+- props 传入`sendMsg`,按Enter键，或者调用`imInputRef.current?.sendMsg()`,会触发`sendMsg`回调
