@@ -7,6 +7,11 @@
   justify-content: center;
   align-items: center;
 
+&_tools{
+  display: flex;
+  flex-flow: row;
+}
+
   &_input{
     width: 550px;
     height: 146px;

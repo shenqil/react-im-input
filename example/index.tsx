@@ -25,11 +25,21 @@ function App(){
     imInputRef.current?.insertEmoji(item)
   }
 
+  function setHTML(){
+    imInputRef.current?.setInnerHTML('设置InnerHTML<div>1111</div>')
+  }
+
+  function getHTML(){
+    console.log(imInputRef.current?.getInnerHTML())
+  }
+
   return (
     <div className='example'>
 
       <div className='example_tools'>
         <Emoji handleEmojiClick={handleEmojiClick}/>
+        <button onClick={()=>setHTML()}>设置InnerHTML</button>
+        <button onClick={()=>getHTML()}>获取InnerHTML</button>
       </div>
 
       <div className='example_input'>
