@@ -1,7 +1,7 @@
 {
-  "name": "@shen9401/react-dialog",
-  "version": "0.0.8",
-  "description": "创建一个弹窗的示例",
+  "name": "@shen9401/react-im-input",
+  "version": "0.0.1",
+  "description": "React 全功能IM 输入框",
   "main": "dist/index.js",
   "scripts": {
     "test": "webpack --config webpack.dev.js",
@@ -12,18 +12,19 @@
     "prepublish": "npm run build"
   },
   "keywords": [
-    "dialog"
+    "IM",
+    "Input"
   ],
   "author": "shen9401",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shenqil/webpack5-reactExp/tree/library"
+    "url": "git+https://github.com/shenqil/react-im-input"
   },
   "bugs": {
-    "url": "https://github.com/shenqil/webpack5-reactExp/issues"
+    "url": "https://github.com/shenqil/react-im-input/issues"
   },
-  "homepage": "https://github.com/shenqil/webpack5-reactExp/blob/library/README.md",
+  "homepage": "https://github.com/shenqil/react-im-input#readme",
   "devDependencies": {
     "@babel/cli": "^7.13.10",
     "@babel/core": "^7.13.10",
