@@ -84,8 +84,7 @@ function IMInput(props:IIMInputProps) {
       document.execCommand('Delete');
     }
 
-    const div = `@${name}`;
-    // const div = `<span class="react-im-input--red" contenteditable="false">@${name}</span> `;
+    const div = `<div style="display: inline-block;"><span class="react-im-input--red" contenteditable="false">@${name}</span>&nbsp;</div>`;
     document.execCommand('insertHTML', false, div);
 
     backupFocus();
@@ -164,7 +163,6 @@ function IMInput(props:IIMInputProps) {
         const aiteDom = document.querySelector(`#${aiteID}`);
         coordinate.current.offsetLeft = (aiteDom as HTMLElement).offsetLeft;
         coordinate.current.offsetTop = (aiteDom as HTMLElement).offsetTop;
-        coordinate.current.isDelete = false;
 
         // 定位完成后删除
         document.execCommand('Delete');
@@ -258,7 +256,6 @@ function usePopupMenu(
   const coordinate = useRef({
     offsetLeft: 0,
     offsetTop: 0,
-    isDelete: false,
   });
   /**
    * 更新过滤值

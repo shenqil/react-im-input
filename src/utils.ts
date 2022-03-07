@@ -63,12 +63,6 @@ export function getMsgListByNode(el:Node | null, result:EMsgItem[] = []) {
           break;
       }
     } else if (child.nodeName === 'DIV') {
-      const lastItem = result.slice(-1)[0];
-      if (lastItem?.type === EMsgType.text) {
-        // 最后一个元素是文本,后面补换行
-        lastItem.data += '\n';
-      }
-
       // 递归
       getMsgListByNode(child, result);
     }

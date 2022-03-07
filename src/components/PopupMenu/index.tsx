@@ -77,7 +77,11 @@ function PopupMenu(props:IPopupMenuProps) {
   }
 
   function enterMember() {
-    handleClickMember(filterMemberList[memberActiveIndex]);
+    if (memberActiveIndex < filterMemberList.length) {
+      handleClickMember(filterMemberList[memberActiveIndex]);
+    } else {
+      hide();
+    }
   }
 
   return (
