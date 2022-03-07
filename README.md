@@ -92,3 +92,8 @@ function App(){
 ## 发送消息
 
 - props 传入`sendMsg`,按Enter键，或者调用`imInputRef.current?.sendMsg()`,会触发`sendMsg`回调
+
+## 直接操作InnerHTML
+
+- `imInputRef.current?.setInnerHTML` 直接覆盖输入框的内容
+- `imInputRef.current?.getInnerHTML` 获取输入框的原生内容

@@ -19,7 +19,9 @@ import './index.scss';
  * */
 export interface IIMRef{
   sendMsg:Function,
-  insertEmoji:Function
+  insertEmoji:Function,
+  setInnerHTML:Function,
+  getInnerHTML:Function
 }
 
 export interface IIMInputProps{
@@ -48,6 +50,8 @@ function IMInput(props:IIMInputProps) {
   useImperativeHandle(onRef, () => ({
     sendMsg,
     insertEmoji,
+    setInnerHTML,
+    getInnerHTML,
   }));
 
   /**
@@ -95,6 +99,26 @@ function IMInput(props:IIMInputProps) {
    * */
   function onClickGroupMember(item:IMemberItem) {
     insertMember(item.name);
+  }
+
+  /**
+   * 设置输入框InnerHTML
+   * */
+  function setInnerHTML(v:string) {
+    if (!editPanelRef.current) {
+      return;
+    }
+    editPanelRef.current.innerHTML = '';
+    focus();
+    document.execCommand('insertHTML', false, v);
+    backupFocus();
+  }
+
+  /**
+   * 获取输入框InnerHTML
+   * */
+  function getInnerHTML() {
+    return editPanelRef.current?.innerHTML || '';
   }
 
   function onKeyDown(e:KeyboardEvent<HTMLDivElement>) {
