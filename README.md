@@ -8,6 +8,7 @@
 # 地址
 
 -[git地址](https://github.com/shenqil/react-im-input)
+-[演示地址](https://shenqil.github.io/react-im-input/)
 
 ***
 
