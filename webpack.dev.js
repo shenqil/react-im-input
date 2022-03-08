@@ -6,12 +6,12 @@ module.exports = {
     entry: './example/index.tsx',
     output: {
       filename: '[name].bundle.js',
-      path: path.resolve(__dirname, 'build'),
+      path: path.resolve(__dirname, 'docs'),
     },
     mode: 'development',
     devtool: 'inline-source-map',
     devServer: {
-        contentBase: './build',
+        contentBase: './docs',
         // 启动gzip 压缩
         compress: true,
         // 端口号
