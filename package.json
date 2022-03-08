@@ -3,6 +3,7 @@
   "version": "0.0.3",
   "description": "React 全功能IM 输入框",
   "main": "dist/index.js",
+  "types": "./type/index.d.ts",
   "scripts": {
     "test": "webpack --config webpack.dev.js",
     "start": "webpack serve --config webpack.dev.js",
