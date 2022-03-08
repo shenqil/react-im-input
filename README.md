@@ -1,10 +1,13 @@
-# 目前支持的功能
+# 预计支持的功能
 
 - [x] Emoji 表情插入到输入框中显示
 - [x] @成员弹出，以及在输入框高亮提示
 - [ ] 支持图片插入，拖拽到输入框中显示
 - [ ] 支持文件插入，拖拽到输入框中显示
-[git地址](https://github.com/shenqil/react-im-input)
+
+# 地址
+
+-[git地址](https://github.com/shenqil/react-im-input)
 
 ***
 

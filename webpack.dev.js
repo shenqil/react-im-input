@@ -1,16 +1,17 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
     entry: './example/index.tsx',
     output: {
       filename: '[name].bundle.js',
-      path: path.resolve(__dirname, 'build'),
+      path: path.resolve(__dirname, 'docs'),
     },
     mode: 'development',
     devtool: 'inline-source-map',
     devServer: {
-        contentBase: './build',
+        contentBase: './docs',
         // 启动gzip 压缩
         compress: true,
         // 端口号
@@ -19,6 +20,7 @@ module.exports = {
         hot: true,
     },
     plugins: [
+      new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({ template: './index.html' }),
     ],
     module: {
