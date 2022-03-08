@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
     entry: './example/index.tsx',
@@ -19,6 +20,7 @@ module.exports = {
         hot: true,
     },
     plugins: [
+      new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({ template: './index.html' }),
     ],
     module: {
