@@ -1,7 +1,7 @@
 import React,{useState,useRef} from 'react'
 import ReactDOM from 'react-dom';
 import './index.scss'
-import IMInput,{IIMRef} from '../src/index'
+import IMInput,{IIMRef,clearCache} from '../src/index'
 import {EMsgItem,IEmojiItem,IMemberItem} from '../src/interface'
 import Emoji from './emoji'
 
@@ -118,11 +118,11 @@ function useCache(imInputRef:React.MutableRefObject<IIMRef>){
   }
 
   function clearConversation1(){
-    imInputRef.current.clearCache('conversation1')
+    clearCache('conversation1')
   }
 
   function clearAll(){
-    imInputRef.current.clearCache(undefined)
+    clearCache(undefined)
   }
 
   return {
