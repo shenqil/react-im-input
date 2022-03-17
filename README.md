@@ -105,6 +105,10 @@ function App(){
 
 ## 5.多会话，输入框内容缓存
 
+```js
+import {clearCache} from '@shen9401/react-im-input'
+```
+
 - 切换`props`上的`inputId`,会缓存上一次id的输入框内容，从而回到上一次`inputId`时，内容能还原
-- 清空指定`inputId`的缓存，`imInputRef.current.clearCache('inputId')`
-- 清空所有缓存,`imInputRef.current.clearCache(undefined)`
+- 清空指定`inputId`的缓存，`clearCache('inputId')`
+- 清空所有缓存,`clearCache(undefined)`

@@ -14,8 +14,10 @@ import {
 import { getMsgListByNode } from './utils';
 import { MemberContextProvider } from './context';
 import PopupMenu, { IPopupMenuRef } from './components/PopupMenu';
-import { cacheMap } from './store';
+import { cacheMap, removeCache } from './store';
 import './index.scss';
+
+export const clearCache:(id:string | undefined)=>void = removeCache;
 
 /**
  * 暴露给外面调用的方法
@@ -24,8 +26,7 @@ export interface IIMRef{
   sendMsg:() => void,
   insertEmoji:(emoji: IEmojiItem) => void,
   setInnerHTML:(v: string) => void,
-  getInnerHTML:() => string,
-  clearCache:(id:string | undefined)=>void
+  getInnerHTML:() => string
 }
 
 export interface IIMInputProps{
@@ -58,9 +59,8 @@ function IMInput(props:IIMInputProps) {
     insertImg,
     insertFile,
   } = useInsert({ backupFocus, focus, filterValue });
-  const {
-    clearCache,
-  } = useCache({ id: inputId, getInnerHTML, setInnerHTML });
+
+  useCache({ id: inputId, getInnerHTML, setInnerHTML });
 
   // 暴露出来的方法
   useImperativeHandle(onRef, () => ({
@@ -68,7 +68,6 @@ function IMInput(props:IIMInputProps) {
     insertEmoji,
     setInnerHTML,
     getInnerHTML,
-    clearCache,
   }));
 
   /**
@@ -380,15 +379,18 @@ function useCache(
   useEffect(() => {
     if (oldId.current) {
       // 缓存旧数据
-      const oldItem = cacheMap.get(oldId.current) || { innerHTML: '', files: {} };
-      oldItem.innerHTML = getInnerHTML();
-      cacheMap.set(oldId.current, oldItem);
+      const oldItem = cacheMap.get(oldId.current);
+      if (oldItem) {
+        oldItem.innerHTML = getInnerHTML();
+        cacheMap.set(oldId.current, oldItem);
+      }
     }
 
     if (id && id !== oldId.current) {
       // 设置新数据
       const curItem = cacheMap.get(id) || { innerHTML: '', files: {} };
       setInnerHTML(curItem.innerHTML);
+      cacheMap.set(id, curItem);
     } else {
       setInnerHTML('');
     }
@@ -407,22 +409,6 @@ function useCache(
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  function clearCache(id:string | undefined) {
-    if (id) {
-      if (oldId.current === id) {
-        oldId.current = '';
-      }
-      cacheMap.delete(id);
-    } else {
-      oldId.current = undefined;
-      cacheMap.clear();
-    }
-  }
-
-  return {
-    clearCache,
-  };
 }
 
 /**
