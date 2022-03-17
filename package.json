@@ -1,6 +1,6 @@
 {
   "name": "@shen9401/react-im-input",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "React 全功能IM 输入框",
   "main": "dist/index.js",
   "types": "./type/index.d.ts",
