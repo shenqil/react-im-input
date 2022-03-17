@@ -18,9 +18,11 @@ export declare enum ECharType {
  * */
 export interface IFilePayload {
     fileRealName: string;
-    fileSize: string;
+    fileSize: number;
+    type: string;
     fileUrl?: string;
     localPath?: string;
+    file?: File;
 }
 /**
  * 定义基本消息结构

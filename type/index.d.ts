@@ -1,6 +1,7 @@
 import React from 'react';
 import { IEmojiItem, IMemberItem, EMsgItem } from './interface';
 import './index.scss';
+export declare const clearCache: (id: string | undefined) => void;
 /**
  * 暴露给外面调用的方法
  * */
@@ -11,6 +12,7 @@ export interface IIMRef {
     getInnerHTML: () => string;
 }
 export interface IIMInputProps {
+    inputId?: string;
     handleSend: (list: EMsgItem[]) => void;
     onRef: React.Ref<IIMRef>;
     memberList: IMemberItem[];
