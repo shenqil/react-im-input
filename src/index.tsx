@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, {
   useRef,
   useState,
@@ -7,11 +6,15 @@ import React, {
   RefObject,
   FormEvent,
   CompositionEvent,
+  useEffect,
 } from 'react';
-import { IEmojiItem, IMemberItem, EMsgItem } from './interface';
+import {
+  IEmojiItem, IMemberItem, EMsgItem, IFilePayload,
+} from './interface';
 import { getMsgListByNode } from './utils';
 import { MemberContextProvider } from './context';
 import PopupMenu, { IPopupMenuRef } from './components/PopupMenu';
+import { cacheMap } from './store';
 import './index.scss';
 
 /**
@@ -21,17 +24,21 @@ export interface IIMRef{
   sendMsg:() => void,
   insertEmoji:(emoji: IEmojiItem) => void,
   setInnerHTML:(v: string) => void,
-  getInnerHTML:() => string
+  getInnerHTML:() => string,
+  clearCache:(id:string | undefined)=>void
 }
 
 export interface IIMInputProps{
+  inputId?:string,
   handleSend:(list:EMsgItem[])=>void,
   onRef:React.Ref<IIMRef>,
   memberList:IMemberItem[]
 }
 
 function IMInput(props:IIMInputProps) {
-  const { handleSend = () => {}, onRef, memberList = [] } = props;
+  const {
+    handleSend = () => {}, onRef, memberList = [], inputId,
+  } = props;
 
   const editPanelRef = useRef<HTMLDivElement>(null);
   const popupMenuRef = useRef<IPopupMenuRef>(null);
@@ -45,6 +52,15 @@ function IMInput(props:IIMInputProps) {
     showPopupMenu,
     hidePopupMenu,
   } = usePopupMenu(editPanelRef, popupMenuRef);
+  const {
+    insertEmoji,
+    insertMember,
+    insertImg,
+    insertFile,
+  } = useInsert({ backupFocus, focus, filterValue });
+  const {
+    clearCache,
+  } = useCache({ id: inputId, getInnerHTML, setInnerHTML });
 
   // 暴露出来的方法
   useImperativeHandle(onRef, () => ({
@@ -52,6 +68,7 @@ function IMInput(props:IIMInputProps) {
     insertEmoji,
     setInnerHTML,
     getInnerHTML,
+    clearCache,
   }));
 
   /**
@@ -63,35 +80,6 @@ function IMInput(props:IIMInputProps) {
       handleSend(msgList);
       editPanelRef.current.innerHTML = '';
     }
-  }
-
-  /**
-   * 插入表情
-   * */
-  function insertEmoji(emoji:IEmojiItem) {
-    focus();
-
-    const img = `<img src='${emoji.data}' alt=${emoji.key} title=${emoji.key} style="vertical-align:-6px; display: inline-block; width: 25px; height: 25px;">`;
-    document.execCommand('insertHTML', false, img);
-
-    backupFocus();
-  }
-
-  /**
-   * 插入群成员
-   * */
-  function insertMember(name:string) {
-    focus();
-
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i <= filterValue.length; i++) {
-      document.execCommand('Delete');
-    }
-
-    const div = `<div style="display: inline-block;"><span class="react-im-input--red" contenteditable="false">@${name}</span>&nbsp;</div>`;
-    document.execCommand('insertHTML', false, div);
-
-    backupFocus();
   }
 
   /**
@@ -201,6 +189,33 @@ function IMInput(props:IIMInputProps) {
     }
   }
 
+  function onDrop(e:React.DragEvent<HTMLDivElement>) {
+    e.stopPropagation();
+    e.preventDefault();
+    const { dataTransfer } = e.nativeEvent as DragEvent;
+    if (!dataTransfer?.files || !dataTransfer?.files.length) {
+      return;
+    }
+
+    const imgReg = /\.(jpg|jpeg|png|bmp)$/i;
+    for (const file of dataTransfer.files) {
+      const filePayload:IFilePayload = {
+        fileRealName: file.name,
+        fileSize: file.size,
+        type: file.type,
+        localPath: (file as any).path, // electron 扩展属性
+        file,
+      };
+      if (imgReg.test(file.name)) {
+        // 图片类型
+        insertImg(filePayload);
+      } else {
+        // 文件类型
+        insertFile(filePayload);
+      }
+    }
+  }
+
   return (
     <div className="react-im-input">
 
@@ -217,6 +232,7 @@ function IMInput(props:IIMInputProps) {
           onCompositionStart={onCompositionStart}
           onCompositionEnd={onCompositionEnd}
           onInput={onInput}
+          onDrop={onDrop}
           role="textbox"
           aria-hidden
           className="react-im-input__container-inner"
@@ -343,6 +359,138 @@ function usePopupMenu(
     hidePopupMenu,
   };
 }
+
+/**
+ * 缓存Hook处理
+ * */
+interface ICache{
+  id:string | undefined,
+  setInnerHTML:Function,
+  getInnerHTML:Function
+}
+function useCache(
+  {
+    id,
+    setInnerHTML,
+    getInnerHTML,
+  }:ICache,
+) {
+  const oldId = useRef<string | undefined>('');
+
+  useEffect(() => {
+    if (oldId.current) {
+      // 缓存旧数据
+      const oldItem = cacheMap.get(oldId.current) || { innerHTML: '', files: {} };
+      oldItem.innerHTML = getInnerHTML();
+      cacheMap.set(oldId.current, oldItem);
+    }
+
+    if (id && id !== oldId.current) {
+      // 设置新数据
+      const curItem = cacheMap.get(id) || { innerHTML: '', files: {} };
+      setInnerHTML(curItem.innerHTML);
+    } else {
+      setInnerHTML('');
+    }
+
+    oldId.current = id;
+
+    return () => {
+      if (id) {
+        const curItem = cacheMap.get(id);
+        if (curItem) {
+          // 存在才缓存，否则是被人清理，不用再次缓存
+          curItem.innerHTML = getInnerHTML();
+          cacheMap.set(id, curItem);
+        }
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  function clearCache(id:string | undefined) {
+    if (id) {
+      if (oldId.current === id) {
+        oldId.current = '';
+      }
+      cacheMap.delete(id);
+    } else {
+      oldId.current = undefined;
+      cacheMap.clear();
+    }
+  }
+
+  return {
+    clearCache,
+  };
+}
+
+/**
+ * 输入框插入Hook处理函数
+ * */
+interface IInsert{
+  focus:Function,
+  backupFocus:Function,
+  filterValue:string
+}
+function useInsert(
+  {
+    focus,
+    backupFocus,
+    filterValue,
+  }:IInsert,
+) {
+  /**
+   * 插入表情
+   * */
+  function insertEmoji(emoji:IEmojiItem) {
+    focus();
+
+    const img = `<img src='${emoji.data}' alt=${emoji.key} title=${emoji.key} style="vertical-align:-6px; display: inline-block; width: 25px; height: 25px;">`;
+    document.execCommand('insertHTML', false, img);
+
+    backupFocus();
+  }
+
+  /**
+   * 插入群成员
+   * */
+  function insertMember(name:string) {
+    focus();
+
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i <= filterValue.length; i++) {
+      document.execCommand('Delete');
+    }
+
+    const div = `<div style="display: inline-block;"><span class="react-im-input--red" contenteditable="false">@${name}</span>&nbsp;</div>`;
+    document.execCommand('insertHTML', false, div);
+
+    backupFocus();
+  }
+
+  /**
+   * 插入图片
+   * */
+  function insertImg(file:IFilePayload) {
+    console.log(file, 'insertImg');
+  }
+
+  /**
+   * 插入文件
+   * */
+  function insertFile(file:IFilePayload) {
+    console.log(file, 'insertFile');
+  }
+
+  return {
+    insertEmoji,
+    insertMember,
+    insertImg,
+    insertFile,
+  };
+}
+
 export interface IIMProps extends IIMInputProps{
 }
 const createIMInput = (Com:any) => (props:IIMProps) => {

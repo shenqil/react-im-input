@@ -20,9 +20,11 @@ export enum ECharType {
  * */
 export interface IFilePayload {
   fileRealName: string,
-  fileSize: string,
-  fileUrl?: string,
-  localPath?:string // 本地路径
+  fileSize: number,
+  type:string,
+  fileUrl?: string, // 网络路径
+  localPath?:string, // 本地路径electron会有
+  file?:File // web端会有
 }
 
 /**
