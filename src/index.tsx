@@ -11,7 +11,9 @@ import React, {
 import {
   IEmojiItem, IMemberItem, EMsgItem, IFilePayload,
 } from './interface';
-import { getMsgListByNode, uuid, fileToBase64 } from './utils';
+import {
+  getMsgListByNode, uuid, fileToBase64, getFileIcon, getBackImg, cutstr, bytesConver,
+} from './utils';
 import { MemberContextProvider } from './context';
 import PopupMenu, { IPopupMenuRef } from './components/PopupMenu';
 import {
@@ -215,6 +217,7 @@ function IMInput(props:IIMInputProps) {
         localPath: (file as any).path, // electron 扩展属性
         file,
       };
+
       if (imgReg.test(file.name)) {
         // 图片类型
         insertImg(filePayload);
@@ -483,8 +486,39 @@ function useInsert(
   /**
    * 插入文件
    * */
-  function insertFile(file:IFilePayload) {
-    console.log(file, 'insertFile');
+  async function insertFile(file:IFilePayload) {
+    focus();
+
+    // 1096 190
+    const canvas = document.createElement('canvas');
+    canvas.width = 252;
+    canvas.height = 72;
+
+    console.log(file, 111);
+    const backImg = await getBackImg() as HTMLImageElement;
+    const iconImg = new Image();
+    iconImg.src = getFileIcon(file.fileRealName);
+    console.log(file, 222);
+    iconImg.onload = () => {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(backImg, 0, 0, 252, 72);
+        ctx.drawImage(iconImg, 203, 15, 34, 41);
+        ctx.font = '14px 微软雅黑';
+        ctx.fillText(cutstr(file.fileRealName, 15), 30, 25);
+        ctx.font = '12px 微软雅黑';
+        ctx.fillText(`${bytesConver(file.fileSize)}`, 30, 55); // 选择位置
+      }
+
+      const b64 = canvas.toDataURL('image/jpeg', 0.9);
+
+      const fileid = uuid();
+      const img = `<img src=${b64} data-fileid=${fileid} title='file' style="vertical-align:-6px; display: inline-block; width: 252px; height: 72px;">`;
+      saveFile(id, fileid, file);
+      document.execCommand('insertHTML', false, img);
+      console.log(b64);
+      backupFocus();
+    };
   }
 
   return {

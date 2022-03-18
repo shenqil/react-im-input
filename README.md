@@ -4,7 +4,7 @@
 - [x] @成员弹出，以及在输入框高亮提示
 - [x] 多会话，输入框内存缓存
 - [x] 支持图片插入，拖拽到输入框中显示
-- [ ] 支持文件插入，拖拽到输入框中显示
+- [x] 支持文件插入，拖拽到输入框中显示
 
 # 地址
 
@@ -25,7 +25,8 @@ npm i @shen9401/react-im-input pinyin-match
 
 # 显示效果
 
-![image.png](https://upload-images.jianshu.io/upload_images/25820166-54b45281248e9765.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://upload-images.jianshu.io/upload_images/25820166-c02a069f1544fcbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 ***
 
 # 使用
@@ -127,7 +128,7 @@ import {clearCache} from '@shen9401/react-im-input'
 
 ### 6.1 拖拽图片进入输入框
 
-- 直接拖入图片到输入框内部，即可自动展示
++ 直接拖入图片到输入框内部，即可自动展示
 
 ### 6.2外部插入图片到输入框
 
@@ -143,11 +144,15 @@ import {clearCache} from '@shen9401/react-im-input'
     imInputRef.current.insertImg(filePayload)
 ```
 
-- 构造一个`FilePayload`
-
++ 构造一个`FilePayload`
 - 调用`insertImg`方法即可
 - `localPath`: **electron** 可以传入的本地图片地址
 - `fileUrl`:**electron** 可以传入的网络图片地址
 - `file`:**web** 传入的File文件对象
 
 ***
+
+## 7.输入框显示文件
+
++ 外面插入，调用 `insertFile`方法
+- 其他使用与图片的使用方式相似
