@@ -1,5 +1,5 @@
 import React from 'react';
-import { IEmojiItem, IMemberItem, EMsgItem } from './interface';
+import { IEmojiItem, IMemberItem, EMsgItem, IFilePayload } from './interface';
 import './index.scss';
 export declare const clearCache: (id: string | undefined) => void;
 /**
@@ -10,6 +10,8 @@ export interface IIMRef {
     insertEmoji: (emoji: IEmojiItem) => void;
     setInnerHTML: (v: string) => void;
     getInnerHTML: () => string;
+    insertImg: (file: IFilePayload) => void;
+    insertFile: (file: IFilePayload) => void;
 }
 export interface IIMInputProps {
     inputId?: string;
