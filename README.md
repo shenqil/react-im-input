@@ -3,7 +3,7 @@
 - [x] Emoji 表情插入到输入框中显示
 - [x] @成员弹出，以及在输入框高亮提示
 - [x] 多会话，输入框内存缓存
-- [ ] 支持图片插入，拖拽到输入框中显示
+- [x] 支持图片插入，拖拽到输入框中显示
 - [ ] 支持文件插入，拖拽到输入框中显示
 
 # 地址
@@ -127,7 +127,7 @@ import {clearCache} from '@shen9401/react-im-input'
 
 ### 6.1 拖拽图片进入输入框
 
-+ 直接拖入图片到输入框内部，即可自动展示
+- 直接拖入图片到输入框内部，即可自动展示
 
 ### 6.2外部插入图片到输入框
 
@@ -143,7 +143,8 @@ import {clearCache} from '@shen9401/react-im-input'
     imInputRef.current.insertImg(filePayload)
 ```
 
-+ 构造一个`FilePayload`
+- 构造一个`FilePayload`
+
 - 调用`insertImg`方法即可
 - `localPath`: **electron** 可以传入的本地图片地址
 - `fileUrl`:**electron** 可以传入的网络图片地址

@@ -107,6 +107,7 @@ function IMInput(props:IIMInputProps) {
     editPanelRef.current.innerHTML = '';
     focus();
     document.execCommand('insertHTML', false, v);
+    editPanelRef.current.scrollTop = editPanelRef.current.scrollHeight;
     backupFocus();
   }
 
