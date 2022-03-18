@@ -33,7 +33,37 @@ module.exports = {
             {
               test: /\.(ts|js)x?$/,
               exclude: /node_modules/,
-              loader: 'babel-loader',
+              use: {
+                loader: 'babel-loader',
+                options: {
+                  // //   预设：指示babel做怎么样的兼容性处理 需要process.env.NODE_ENV 为生产环境
+                  // presets: ['@babel/preset-env'],
+                  presets: [
+                    [
+                      "@babel/preset-env",
+                      {
+                          "useBuiltIns": "usage",
+                          "corejs": {
+                              //core-js的版本
+                              "version": 3
+                          },
+                          "targets": {
+                              "edge": "17",
+                              "firefox": "60",
+                              "chrome": "67",
+                              "safari": "11.1",
+                              "ie": "8"
+                          }
+                      }
+                    ],
+                    "@babel/preset-react",
+                    "@babel/preset-typescript"
+                  ],
+                  plugins: [
+                    "@babel/plugin-proposal-class-properties"
+                  ]
+                },
+              },
             },
             {
               test: /\.(png|svg|jpg|jpeg|gif)$/i,
