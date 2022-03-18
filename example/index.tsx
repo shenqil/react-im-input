@@ -2,7 +2,7 @@ import React,{useState,useRef} from 'react'
 import ReactDOM from 'react-dom';
 import './index.scss'
 import IMInput,{IIMRef,clearCache} from '../src/index'
-import {EMsgItem,IEmojiItem,IMemberItem} from '../src/interface'
+import {EMsgItem,IEmojiItem,IMemberItem,IFilePayload} from '../src/interface'
 import Emoji from './emoji'
 
 import img1 from './img/1.jpg'
@@ -41,6 +41,27 @@ function App(){
     setOut([imInputRef.current?.getInnerHTML() as any])
   }
 
+  function onInputFile(e){
+    console.log(e.nativeEvent.target.files[0])
+    const file = e.nativeEvent.target.files[0]
+    const imgReg = /\.(jpg|jpeg|png|bmp)$/i;
+
+    const filePayload:IFilePayload = {
+      fileRealName: file.name,
+      fileSize: file.size,
+      type: file.type,
+      localPath: (file as any).path, // electron 扩展属性
+      file,
+    };
+
+    if(imgReg.test(file.name)){
+      imInputRef.current.insertImg(filePayload)
+    }else{
+      imInputRef.current.insertFile(filePayload)
+    }
+
+  }
+
   return (
     <div className='example'>
 
@@ -57,6 +78,7 @@ function App(){
         </div>
         <div>插入:
           <Emoji handleEmojiClick={handleEmojiClick}/>
+          <input type="file" name="file" id="file" onInput={onInputFile}/>
         </div>
       </div>
 

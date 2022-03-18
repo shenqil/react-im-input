@@ -11,10 +11,12 @@ import React, {
 import {
   IEmojiItem, IMemberItem, EMsgItem, IFilePayload,
 } from './interface';
-import { getMsgListByNode } from './utils';
+import { getMsgListByNode, uuid, fileToBase64 } from './utils';
 import { MemberContextProvider } from './context';
 import PopupMenu, { IPopupMenuRef } from './components/PopupMenu';
-import { cacheMap, removeCache } from './store';
+import {
+  cacheMap, saveHTML, getCacheItem, removeCache, saveFile, getFile,
+} from './store';
 import './index.scss';
 
 export const clearCache:(id:string | undefined)=>void = removeCache;
@@ -26,7 +28,9 @@ export interface IIMRef{
   sendMsg:() => void,
   insertEmoji:(emoji: IEmojiItem) => void,
   setInnerHTML:(v: string) => void,
-  getInnerHTML:() => string
+  getInnerHTML:() => string,
+  insertImg:(file:IFilePayload)=>void,
+  insertFile:(file:IFilePayload)=>void
 }
 
 export interface IIMInputProps{
@@ -58,7 +62,9 @@ function IMInput(props:IIMInputProps) {
     insertMember,
     insertImg,
     insertFile,
-  } = useInsert({ backupFocus, focus, filterValue });
+  } = useInsert({
+    id: inputId || '', backupFocus, focus, filterValue,
+  });
 
   useCache({ id: inputId, getInnerHTML, setInnerHTML });
 
@@ -66,6 +72,8 @@ function IMInput(props:IIMInputProps) {
   useImperativeHandle(onRef, () => ({
     sendMsg,
     insertEmoji,
+    insertImg,
+    insertFile,
     setInnerHTML,
     getInnerHTML,
   }));
@@ -75,8 +83,9 @@ function IMInput(props:IIMInputProps) {
    * */
   function sendMsg() {
     if (editPanelRef.current) {
-      const msgList = getMsgListByNode(editPanelRef.current);
+      const msgList = getMsgListByNode(editPanelRef.current, (fileId:string) => getFile(inputId || '', fileId));
       handleSend(msgList);
+      clearCache(inputId || '');
       editPanelRef.current.innerHTML = '';
     }
   }
@@ -377,20 +386,15 @@ function useCache(
   const oldId = useRef<string | undefined>('');
 
   useEffect(() => {
+    // 缓存旧数据
     if (oldId.current) {
-      // 缓存旧数据
-      const oldItem = cacheMap.get(oldId.current);
-      if (oldItem) {
-        oldItem.innerHTML = getInnerHTML();
-        cacheMap.set(oldId.current, oldItem);
-      }
+      saveHTML(oldId.current, getInnerHTML());
     }
 
     if (id && id !== oldId.current) {
       // 设置新数据
-      const curItem = cacheMap.get(id) || { innerHTML: '', files: {} };
+      const curItem = getCacheItem(id);
       setInnerHTML(curItem.innerHTML);
-      cacheMap.set(id, curItem);
     } else {
       setInnerHTML('');
     }
@@ -417,13 +421,15 @@ function useCache(
 interface IInsert{
   focus:Function,
   backupFocus:Function,
-  filterValue:string
+  filterValue:string,
+  id:string
 }
 function useInsert(
   {
     focus,
     backupFocus,
     filterValue,
+    id,
   }:IInsert,
 ) {
   /**
@@ -458,8 +464,19 @@ function useInsert(
   /**
    * 插入图片
    * */
-  function insertImg(file:IFilePayload) {
-    console.log(file, 'insertImg');
+  async function insertImg(file:IFilePayload) {
+    focus();
+
+    const fileid = uuid();
+    let src = file.localPath || file.localPath || '';
+    if (!src && file.file) {
+      src = await fileToBase64(file.file) as string;
+    }
+    const img = `<img src=${src} data-fileid=${fileid} title='img'  style="vertical-align:-6px; display: inline-block; max-width: 200px; max-height: 200px;">`;
+    document.execCommand('insertHTML', false, img);
+    saveFile(id, fileid, file);
+
+    backupFocus();
   }
 
   /**
