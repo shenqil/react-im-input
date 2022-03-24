@@ -489,9 +489,13 @@ function useInsert(
     if (!src && file.file) {
       src = await fileToBase64(file.file) as string;
     }
-    const img = `<img src=${src} data-fileid=${fileid} title='img'  style="vertical-align:-6px; display: inline-block; max-width: 200px; max-height: 200px;">`;
+    const img = `<img src=${src} id=${fileid} title='img'  style="vertical-align:-6px; display: inline-block; max-width: 200px; max-height: 200px;">`;
     document.execCommand('insertHTML', false, img);
     saveFile(id, fileid, file);
+    setTimeout(() => {
+      const item = document.getElementById(fileid);
+      item?.scrollIntoView({ block: 'end', inline: 'nearest' });
+    });
 
     backupFocus();
   }
@@ -525,10 +529,14 @@ function useInsert(
       const b64 = canvas.toDataURL('image/jpeg', 0.9);
 
       const fileid = uuid();
-      const img = `<img src=${b64} data-fileid=${fileid} title='file' style="vertical-align:-6px; display: inline-block; width: 252px; height: 72px;">`;
+      const img = `<img src=${b64} id=${fileid} title='file' style="vertical-align:-6px; display: inline-block; width: 252px; height: 72px;">`;
       saveFile(id, fileid, file);
       document.execCommand('insertHTML', false, img);
-      console.log(b64);
+      setTimeout(() => {
+        const item = document.getElementById(fileid);
+        item?.scrollIntoView({ block: 'end', inline: 'nearest' });
+      });
+
       backupFocus();
     };
   }

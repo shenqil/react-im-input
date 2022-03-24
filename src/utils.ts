@@ -36,7 +36,7 @@ export function getMsgListByNode(el:Node | null, findFile:Function, result:EMsgI
     } else if (child.nodeName === 'IMG') {
       const imgNode = (child as HTMLImageElement);
       // 2.处理图片类型
-      const fileid = imgNode.getAttribute('data-fileid') || '';
+      const fileid = imgNode.getAttribute('id') || '';
 
       switch (imgNode.title) {
         case 'img':
@@ -89,7 +89,6 @@ export function getBackImg() {
         clearInterval(time);
         resolve(baseImg);
       }
-      console.log(baseImgFlag);
     }, 50);
   });
 }
