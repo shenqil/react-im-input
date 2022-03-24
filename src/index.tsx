@@ -449,51 +449,13 @@ function useInsert(
     id,
   }:IInsert,
 ) {
-  /**
-   * 插入表情
-   * */
-  function insertEmoji(emoji:IEmojiItem) {
+  function insert(callBack:(uid:string)=>string) {
     focus();
 
-    const img = `<img src='${emoji.data}' alt=${emoji.key} title=${emoji.key} style="vertical-align:-6px; display: inline-block; width: 25px; height: 25px;">`;
-    document.execCommand('insertHTML', false, img);
-
-    backupFocus();
-  }
-
-  /**
-   * 插入群成员
-   * */
-  function insertMember(name:string) {
-    focus();
-
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i <= filterValue.length; i++) {
-      document.execCommand('Delete');
-    }
-
-    const div = `<span class="react-im-input--red" contenteditable="false">@${name}</span>&nbsp;`;
-    document.execCommand('insertHTML', false, div);
-
-    backupFocus();
-  }
-
-  /**
-   * 插入图片
-   * */
-  async function insertImg(file:IFilePayload) {
-    focus();
-
-    const fileid = uuid();
-    let src = file.localPath || file.localPath || '';
-    if (!src && file.file) {
-      src = await fileToBase64(file.file) as string;
-    }
-    const img = `<img src=${src} id=${fileid} title='img'  style="vertical-align:-6px; display: inline-block; max-width: 200px; max-height: 200px;">`;
-    document.execCommand('insertHTML', false, img);
-    saveFile(id, fileid, file);
+    const uid = uuid();
+    document.execCommand('insertHTML', false, callBack(uid));
     setTimeout(() => {
-      const item = document.getElementById(fileid);
+      const item = document.getElementById(uid);
       item?.scrollIntoView({ block: 'end', inline: 'nearest' });
     });
 
@@ -501,11 +463,42 @@ function useInsert(
   }
 
   /**
+   * 插入表情
+   * */
+  function insertEmoji(emoji:IEmojiItem) {
+    insert((uid) => `<img id=${uid} src='${emoji.data}' alt=${emoji.key} title=${emoji.key} style="vertical-align:-6px; display: inline-block; width: 25px; height: 25px;">`);
+  }
+
+  /**
+   * 插入群成员
+   * */
+  function insertMember(name:string) {
+    insert((uid) => {
+      for (let i = 0; i <= filterValue.length; i++) {
+        document.execCommand('Delete');
+      }
+      return `<span id=${uid} class="react-im-input--red" contenteditable="false">@${name}</span>&nbsp;`;
+    });
+  }
+
+  /**
+   * 插入图片
+   * */
+  async function insertImg(file:IFilePayload) {
+    let src = file.localPath || file.localPath || '';
+    if (!src && file.file) {
+      src = await fileToBase64(file.file) as string;
+    }
+    insert((uid) => {
+      saveFile(id, uid, file);
+      return `<img src=${src} id=${uid} title='img'  style="vertical-align:-6px; display: inline-block; max-width: 200px; max-height: 200px;">`;
+    });
+  }
+
+  /**
    * 插入文件
    * */
   async function insertFile(file:IFilePayload) {
-    focus();
-
     // 1096 190
     const canvas = document.createElement('canvas');
     canvas.width = 252;
@@ -528,13 +521,9 @@ function useInsert(
 
       const b64 = canvas.toDataURL('image/jpeg', 0.9);
 
-      const fileid = uuid();
-      const img = `<img src=${b64} id=${fileid} title='file' style="vertical-align:-6px; display: inline-block; width: 252px; height: 72px;">`;
-      saveFile(id, fileid, file);
-      document.execCommand('insertHTML', false, img);
-      setTimeout(() => {
-        const item = document.getElementById(fileid);
-        item?.scrollIntoView({ block: 'end', inline: 'nearest' });
+      insert((uid) => {
+        saveFile(id, uid, file);
+        return `<img src=${b64} id=${uid} title='file' style="vertical-align:-6px; display: inline-block; width: 252px; height: 72px;">`;
       });
 
       backupFocus();
