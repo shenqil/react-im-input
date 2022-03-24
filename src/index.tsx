@@ -47,6 +47,7 @@ function IMInput(props:IIMInputProps) {
     handleSend = () => {}, onRef, memberList = [], inputId,
   } = props;
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const editPanelRef = useRef<HTMLDivElement>(null);
   const popupMenuRef = useRef<IPopupMenuRef>(null);
   const isComposition = useRef(false);
@@ -58,7 +59,7 @@ function IMInput(props:IIMInputProps) {
     updateFilterValue,
     showPopupMenu,
     hidePopupMenu,
-  } = usePopupMenu(editPanelRef, popupMenuRef);
+  } = usePopupMenu(containerRef, editPanelRef, popupMenuRef);
   const {
     insertEmoji,
     insertMember,
@@ -228,11 +229,22 @@ function IMInput(props:IIMInputProps) {
     }
   }
 
+  function onFocus() {
+    if (editPanelRef.current !== document.activeElement) {
+      focus();
+    }
+  }
+
   return (
     <div className="react-im-input">
 
       {/* 输入框内容区 */}
-      <div className="react-im-input__container">
+      <div
+        ref={containerRef}
+        onClick={() => onFocus()}
+        className="react-im-input__container"
+        aria-hidden
+      >
         <div
           ref={editPanelRef}
           contentEditable="true"
@@ -298,6 +310,7 @@ function useCursor(editPanelRef:RefObject<HTMLDivElement>) {
  * 弹窗Hook处理函数
  * */
 function usePopupMenu(
+  containerRef:RefObject<HTMLDivElement>,
   editPanelRef:RefObject<HTMLDivElement>,
   popupMenuRef:RefObject<IPopupMenuRef>,
 ) {
@@ -339,13 +352,13 @@ function usePopupMenu(
   function showPopupMenu() {
     let left = coordinate.current.offsetLeft;
 
-    if (!editPanelRef.current || !popupMenuRef.current) {
+    if (!editPanelRef.current || !popupMenuRef.current || !containerRef.current) {
       return;
     }
 
     const top = coordinate.current.offsetTop - editPanelRef.current.scrollTop;
 
-    if (left + 166 > editPanelRef.current.clientWidth) {
+    if (left + 166 > containerRef.current.clientWidth) {
       left -= 166;
     }
 
@@ -459,7 +472,7 @@ function useInsert(
       document.execCommand('Delete');
     }
 
-    const div = `<div style="display: inline-block;"><span class="react-im-input--red" contenteditable="false">@${name}</span>&nbsp;</div>`;
+    const div = `<span class="react-im-input--red" contenteditable="false">@${name}</span>&nbsp;`;
     document.execCommand('insertHTML', false, div);
 
     backupFocus();
@@ -494,11 +507,10 @@ function useInsert(
     canvas.width = 252;
     canvas.height = 72;
 
-    console.log(file, 111);
     const backImg = await getBackImg() as HTMLImageElement;
     const iconImg = new Image();
     iconImg.src = getFileIcon(file.fileRealName);
-    console.log(file, 222);
+
     iconImg.onload = () => {
       const ctx = canvas.getContext('2d');
       if (ctx) {
