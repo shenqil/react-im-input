@@ -356,7 +356,7 @@ function usePopupMenu(
       return;
     }
 
-    const top = coordinate.current.offsetTop - editPanelRef.current.scrollTop;
+    const top = coordinate.current.offsetTop - containerRef.current.scrollTop;
 
     if (left + 166 > containerRef.current.clientWidth) {
       left -= 166;
