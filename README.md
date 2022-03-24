@@ -1,4 +1,4 @@
-# 预计支持的功能
+# 已支持的功能
 
 - [x] Emoji 表情插入到输入框中显示
 - [x] @成员弹出，以及在输入框高亮提示
@@ -10,6 +10,7 @@
 
 -[git地址](https://github.com/shenqil/react-im-input)
 -[演示地址](https://shenqil.github.io/react-im-input/)
+-[issues](https://github.com/shenqil/react-im-input/issues)
 
 ***
 
@@ -128,7 +129,7 @@ import {clearCache} from '@shen9401/react-im-input'
 
 ### 6.1 拖拽图片进入输入框
 
-+ 直接拖入图片到输入框内部，即可自动展示
+- 直接拖入图片到输入框内部，即可自动展示
 
 ### 6.2外部插入图片到输入框
 
@@ -144,7 +145,8 @@ import {clearCache} from '@shen9401/react-im-input'
     imInputRef.current.insertImg(filePayload)
 ```
 
-+ 构造一个`FilePayload`
+- 构造一个`FilePayload`
+
 - 调用`insertImg`方法即可
 - `localPath`: **electron** 可以传入的本地图片地址
 - `fileUrl`:**electron** 可以传入的网络图片地址
@@ -154,5 +156,6 @@ import {clearCache} from '@shen9401/react-im-input'
 
 ## 7.输入框显示文件
 
-+ 外面插入，调用 `insertFile`方法
+- 外面插入，调用 `insertFile`方法
+
 - 其他使用与图片的使用方式相似
