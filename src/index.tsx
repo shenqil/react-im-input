@@ -246,6 +246,11 @@ function IMInput(props:IIMInputProps) {
       <div
         ref={containerRef}
         onClick={() => onFocus()}
+        onDrop={onDrop}
+        onDragOver={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
         className="react-im-input__container"
         aria-hidden
       >
@@ -260,7 +265,6 @@ function IMInput(props:IIMInputProps) {
           onCompositionStart={onCompositionStart}
           onCompositionEnd={onCompositionEnd}
           onInput={onInput}
-          onDrop={onDrop}
           role="textbox"
           aria-hidden
           className="react-im-input__container-inner"
